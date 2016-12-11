@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="WordCount" ApplicationTypeVersion="1.0.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+<ApplicationManifest 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+  xmlns="http://schemas.microsoft.com/2011/01/fabric" 
+  ApplicationTypeName="WordCount"  ApplicationTypeVersion="1.0.0">
   <Parameters>
     <Parameter Name="WordCountWebService_InstanceCount" DefaultValue="1" />
     <Parameter Name="WordCountService_PartitionCount" DefaultValue="2" />
