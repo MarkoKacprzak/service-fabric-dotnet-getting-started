@@ -1297,22 +1297,19 @@
           "lib/net451/Microsoft.Net.WebSockets.dll": {}
         }
       },
-      "Microsoft.ServiceFabric/5.0.135": {
+      "Microsoft.ServiceFabric/5.4.145": {
         "type": "package",
         "compile": {
           "lib/net45/Microsoft.ServiceFabric.Internal.Strings.dll": {},
           "lib/net45/Microsoft.ServiceFabric.Internal.dll": {},
+          "lib/net45/System.Fabric.Strings.dll": {},
           "lib/net45/System.Fabric.dll": {}
         },
         "runtime": {
           "lib/net45/Microsoft.ServiceFabric.Internal.Strings.dll": {},
           "lib/net45/Microsoft.ServiceFabric.Internal.dll": {},
+          "lib/net45/System.Fabric.Strings.dll": {},
           "lib/net45/System.Fabric.dll": {}
-        },
-        "resource": {
-          "lib/net45/en-us/Microsoft.ServiceFabric.Internal.Strings.resources.dll": {
-            "locale": "en-us"
-          }
         }
       },
       "Microsoft.ServiceFabric.AspNet.Hosting/1.0.0-rc1": {
@@ -1336,10 +1333,10 @@
           "lib/dnx451/Microsoft.ServiceFabric.AspNet.Hosting.dll": {}
         }
       },
-      "Microsoft.ServiceFabric.Data/2.0.135": {
+      "Microsoft.ServiceFabric.Data/2.4.145": {
         "type": "package",
         "dependencies": {
-          "Microsoft.ServiceFabric": "[5.0.135]"
+          "Microsoft.ServiceFabric": "[5.4.145]"
         },
         "frameworkAssemblies": [
           "System.Runtime.Serialization"
@@ -1353,17 +1350,19 @@
           "lib/net45/Microsoft.ServiceFabric.Data.dll": {}
         }
       },
-      "Microsoft.ServiceFabric.Services/2.0.135": {
+      "Microsoft.ServiceFabric.Services/2.4.145": {
         "type": "package",
         "dependencies": {
-          "Microsoft.ServiceFabric": "[5.0.135]",
-          "Microsoft.ServiceFabric.Data": "[2.0.135]"
+          "Microsoft.ServiceFabric": "[5.4.145]",
+          "Microsoft.ServiceFabric.Data": "[2.4.145]"
         },
         "compile": {
-          "lib/net45/Microsoft.ServiceFabric.Services.dll": {}
+          "lib/net45/Microsoft.ServiceFabric.Services.dll": {},
+          "lib/net45/ServiceFabricServiceModel.dll": {}
         },
         "runtime": {
-          "lib/net45/Microsoft.ServiceFabric.Services.dll": {}
+          "lib/net45/Microsoft.ServiceFabric.Services.dll": {},
+          "lib/net45/ServiceFabricServiceModel.dll": {}
         }
       },
       "Newtonsoft.Json/6.0.6": {
@@ -2520,18 +2519,18 @@
         "lib/net451/Microsoft.Net.WebSockets.xml"
       ]
     },
-    "Microsoft.ServiceFabric/5.0.135": {
-      "sha512": "Kt9Wx0oIFy/72zASxSmJljrNi6mCEsyXVA/iSlh62M5NbD585UvuemiwWR9ZhqxARfWh4Ap6dAkE24sj0PUc+g==",
+    "Microsoft.ServiceFabric/5.4.145": {
+      "sha512": "aPHNi4TJ0Yt26ZBz+PW2Y6s5fk+fzui4/f0tRWwwakJUevECQhRUckLGJy6Zppv+BogwxjA6xKpjXSRVaxxaLw==",
       "type": "package",
-      "path": "Microsoft.ServiceFabric/5.0.135",
+      "path": "Microsoft.ServiceFabric/5.4.145",
       "files": [
-        "Microsoft.ServiceFabric.5.0.135.nupkg.sha512",
+        "Microsoft.ServiceFabric.5.4.145.nupkg.sha512",
         "Microsoft.ServiceFabric.nuspec",
         "lib/net45/Microsoft.ServiceFabric.Internal.Strings.dll",
         "lib/net45/Microsoft.ServiceFabric.Internal.dll",
+        "lib/net45/System.Fabric.Strings.dll",
         "lib/net45/System.Fabric.dll",
-        "lib/net45/System.Fabric.xml",
-        "lib/net45/en-us/Microsoft.ServiceFabric.Internal.Strings.resources.dll"
+        "lib/net45/System.Fabric.xml"
       ]
     },
     "Microsoft.ServiceFabric.AspNet.Hosting/1.0.0-rc1": {
@@ -2545,12 +2544,12 @@
         "lib/dnx451/Microsoft.ServiceFabric.AspNet.Hosting.xml"
       ]
     },
-    "Microsoft.ServiceFabric.Data/2.0.135": {
-      "sha512": "YVXUd0w7i72wrmORDfiV/FG7mhTZKnrSFrCBrgRKek4D1NHoYrrpSvCCjrXIzFmWWA6fOjbw6MD3AbY/Ns+dXA==",
+    "Microsoft.ServiceFabric.Data/2.4.145": {
+      "sha512": "XdF6uh6UuSC9Rs17M456SCeEqBSRK5ZiIX5BcezRZeyjeppnH8+nBpglOVksbuBl0z1yJesoCbuWAFBmFwLsuQ==",
       "type": "package",
-      "path": "Microsoft.ServiceFabric.Data/2.0.135",
+      "path": "Microsoft.ServiceFabric.Data/2.4.145",
       "files": [
-        "Microsoft.ServiceFabric.Data.2.0.135.nupkg.sha512",
+        "Microsoft.ServiceFabric.Data.2.4.145.nupkg.sha512",
         "Microsoft.ServiceFabric.Data.nuspec",
         "lib/net45/Microsoft.ServiceFabric.Data.Interfaces.dll",
         "lib/net45/Microsoft.ServiceFabric.Data.Interfaces.xml",
@@ -2558,12 +2557,12 @@
         "lib/net45/Microsoft.ServiceFabric.Data.xml"
       ]
     },
-    "Microsoft.ServiceFabric.Services/2.0.135": {
-      "sha512": "dDZOEOuZ/fKBz/XdgBIQKTs6HWo++y1FeWxzGJXW0mbTTHS/L68Eds8MYyn6fucAl/tcsA9KkWAipVJkTJqkcg==",
+    "Microsoft.ServiceFabric.Services/2.4.145": {
+      "sha512": "fRddaHUyz8pbiSLtj9I5Td8liDtFbUnggHjabN3UoWS9v1WAAFfW5mJ/f/jMhT6s4NNmbKAUW6Dj/UBCRcbs0g==",
       "type": "package",
-      "path": "Microsoft.ServiceFabric.Services/2.0.135",
+      "path": "Microsoft.ServiceFabric.Services/2.4.145",
       "files": [
-        "Microsoft.ServiceFabric.Services.2.0.135.nupkg.sha512",
+        "Microsoft.ServiceFabric.Services.2.4.145.nupkg.sha512",
         "Microsoft.ServiceFabric.Services.nuspec",
         "lib/net45/Microsoft.ServiceFabric.Services.dll",
         "lib/net45/Microsoft.ServiceFabric.Services.xml",
@@ -3343,7 +3342,7 @@
       "Microsoft.AspNet.Server.WebListener >= 1.0.0-rc1-final",
       "Microsoft.AspNet.StaticFiles >= 1.0.0-rc1-final",
       "Microsoft.ServiceFabric.AspNet.Hosting >= 1.0.0-rc1",
-      "Microsoft.ServiceFabric.Services >= 2.0.135"
+      "Microsoft.ServiceFabric.Services >= 2.4.145"
     ],
     "DNX,Version=v4.5.1": []
   },
