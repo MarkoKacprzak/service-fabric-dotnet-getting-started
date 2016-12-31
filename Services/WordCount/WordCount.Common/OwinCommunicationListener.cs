@@ -22,12 +22,12 @@ namespace WordCount.Common
         /// <summary>
         /// OWIN server handle.
         /// </summary>
-        private IDisposable serverHandle;
+        private IDisposable _serverHandle;
 
-        private IOwinAppBuilder startup;
-        private string publishAddress;
-        private string listeningAddress;
-        private string appRoot;
+        private readonly IOwinAppBuilder _startup;
+        private string _publishAddress;
+        private string _listeningAddress;
+        private readonly string _appRoot;
 
         public OwinCommunicationListener(IOwinAppBuilder startup, ServiceContext serviceContext)
             : this(null, startup, serviceContext)
@@ -36,8 +36,8 @@ namespace WordCount.Common
 
         public OwinCommunicationListener(string appRoot, IOwinAppBuilder startup, ServiceContext serviceContext)
         {
-            this.startup = startup;
-            this.appRoot = appRoot;
+            this._startup = startup;
+            this._appRoot = appRoot;
             this.serviceContext = serviceContext;
         }
 
@@ -45,14 +45,14 @@ namespace WordCount.Common
         {
             Trace.WriteLine("Initialize");
 
-            EndpointResourceDescription serviceEndpoint = this.serviceContext.CodePackageActivationContext.GetEndpoint("ServiceEndpoint");
+            EndpointResourceDescription serviceEndpoint = this.serviceContext.CodePackageActivationContext.GetEndpoint("WordEndpoint");
             int port = serviceEndpoint.Port;
 
             if (this.serviceContext is StatefulServiceContext)
             {
                 StatefulServiceContext statefulInitParams = (StatefulServiceContext) this.serviceContext;
 
-                this.listeningAddress = String.Format(
+                this._listeningAddress = string.Format(
                     CultureInfo.InvariantCulture,
                     "http://+:{0}/{1}/{2}/{3}/",
                     port,
@@ -62,30 +62,30 @@ namespace WordCount.Common
             }
             else if (this.serviceContext is StatelessServiceContext)
             {
-                this.listeningAddress = String.Format(
+                this._listeningAddress = String.Format(
                     CultureInfo.InvariantCulture,
                     "http://+:{0}/{1}",
                     port,
-                    string.IsNullOrWhiteSpace(this.appRoot)
+                    string.IsNullOrWhiteSpace(this._appRoot)
                         ? ""
-                        : this.appRoot.TrimEnd('/') + '/');
+                        : this._appRoot.TrimEnd('/') + '/');
             }
             else
             {
                 throw new InvalidOperationException();
             }
 
-            this.publishAddress = this.listeningAddress.Replace("+", FabricRuntime.GetNodeContext().IPAddressOrFQDN);
+            this._publishAddress = this._listeningAddress.Replace("+", FabricRuntime.GetNodeContext().IPAddressOrFQDN);
 
-            Trace.WriteLine(String.Format("Opening on {0}", this.publishAddress));
+            Trace.WriteLine($"Opening on {this._publishAddress}");
 
             try
             {
-                Trace.WriteLine(String.Format("Starting web server on {0}", this.listeningAddress));
+                Trace.WriteLine($"Starting web server on {this._listeningAddress}");
 
-                this.serverHandle = WebApp.Start(this.listeningAddress, appBuilder => this.startup.Configuration(appBuilder));
+                this._serverHandle = WebApp.Start(this._listeningAddress, appBuilder => this._startup.Configuration(appBuilder));
 
-                return Task.FromResult(this.publishAddress);
+                return Task.FromResult(this._publishAddress);
             }
             catch (Exception ex)
             {
@@ -115,11 +115,11 @@ namespace WordCount.Common
 
         private void StopWebServer()
         {
-            if (this.serverHandle != null)
+            if (this._serverHandle != null)
             {
                 try
                 {
-                    this.serverHandle.Dispose();
+                    this._serverHandle.Dispose();
                 }
                 catch (ObjectDisposedException)
                 {

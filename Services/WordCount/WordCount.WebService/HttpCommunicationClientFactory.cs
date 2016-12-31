@@ -17,7 +17,8 @@ namespace WordCount.WebService
     {
         private HttpClient httpClient = new HttpClient();
 
-        public HttpCommunicationClientFactory(IServicePartitionResolver resolver = null, IEnumerable<IExceptionHandler> exceptionHandlers = null)
+        public HttpCommunicationClientFactory(IServicePartitionResolver resolver = null, 
+            IEnumerable<IExceptionHandler> exceptionHandlers = null)
             : base(resolver, CreateExceptionHandlers(exceptionHandlers))
         {
         }
@@ -28,7 +29,8 @@ namespace WordCount.WebService
             // HTTP clients don't hold persistent connections, so no action is taken.
         }
 
-        protected override Task<HttpCommunicationClient> CreateClientAsync(string endpoint, CancellationToken cancellationToken)
+        protected override Task<HttpCommunicationClient> CreateClientAsync(string endpoint, 
+            CancellationToken cancellationToken)
         {
             // clients that maintain persistent connections to a service should 
             // create that connection here.

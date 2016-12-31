@@ -22,7 +22,7 @@
       <!--
         You can also listen on a specific port. 
        -->
-      <Endpoint Name="ServiceEndpoint" Type="Input" Protocol="http" Port="8081" />
+      <Endpoint Name="WordEndpoint" Type="Input" Protocol="http" Port="8081" />
       
     </Endpoints>
   </Resources>
