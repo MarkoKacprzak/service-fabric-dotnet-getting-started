@@ -1,6 +1,6 @@
 {
-    "webroot": "wwwroot",
-    "version": "1.0.0-*",
+  "webroot": "wwwroot",
+  "version": "1.0.0-*",
 
   "dependencies": {
     "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
@@ -10,26 +10,31 @@
     "Microsoft.ServiceFabric.Services": "2.0.135"
   },
 
-    "commands": {
-        "web": "Microsoft.AspNet.Hosting --config hosting.ini"
-    },
+  "commands": {
+    "web": "Microsoft.AspNet.Hosting --config hosting.ini"
+  },
 
-    "frameworks": {
-        "dnx451": { }
-    },
-
-    "exclude": [
+  "frameworks": {
+    "dnx451": {}
+  },
+  "buildOptions": {
+    "compile": {
+      "exclude": [
         "wwwroot",
         "node_modules",
         "bower_components",
         "PackageRoot"
-    ],
-    "publishExclude": [
-        "node_modules",
-        "bower_components",
-        "**.xproj",
-        "**.user",
-        "**.vspscc",
-        "PackageRoot"
+      ]
+    }
+  },
+  "publishOptions": {
+    "exclude": [
+      "node_modules",
+      "bower_components",
+      "**.xproj",
+      "**.user",
+      "**.vspscc",
+      "PackageRoot"
     ]
+  }
 }
