@@ -2,32 +2,31 @@
 //  Copyright (c) Microsoft Corporation.  All rights reserved.
 //  Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
 // ------------------------------------------------------------
+using System;
+using System.Diagnostics;
+using System.Fabric;
+using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Owin.Hosting;
+using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
 namespace WordCount.Common
 {
-    using System;
-    using System.Diagnostics;
-    using System.Fabric;
-    using System.Fabric.Description;
-    using System.Globalization;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Microsoft.Owin.Hosting;
-    using Microsoft.ServiceFabric.Services.Communication.Runtime;
-
+   
     public class OwinCommunicationListener : ICommunicationListener
     {
-        private readonly ServiceContext serviceContext;
+        private readonly ServiceContext _serviceContext;
 
+       
+        private readonly IOwinAppBuilder _startup;
+        private readonly string _appRoot;
+        private string _publishAddress;
+        private string _listeningAddress;
         /// <summary>
         /// OWIN server handle.
         /// </summary>
-        private IDisposable serverHandle;
-
-        private IOwinAppBuilder startup;
-        private string publishAddress;
-        private string listeningAddress;
-        private string appRoot;
+        private IDisposable _serverHandle;
 
         public OwinCommunicationListener(IOwinAppBuilder startup, ServiceContext serviceContext)
             : this(null, startup, serviceContext)
@@ -36,56 +35,51 @@ namespace WordCount.Common
 
         public OwinCommunicationListener(string appRoot, IOwinAppBuilder startup, ServiceContext serviceContext)
         {
-            this.startup = startup;
-            this.appRoot = appRoot;
-            this.serviceContext = serviceContext;
+            this._startup = startup;
+            this._appRoot = appRoot;
+            this._serviceContext = serviceContext;
         }
 
         public Task<string> OpenAsync(CancellationToken cancellationToken)
         {
             Trace.WriteLine("Initialize");
 
-            EndpointResourceDescription serviceEndpoint = this.serviceContext.CodePackageActivationContext.GetEndpoint("ServiceEndpoint");
-            int port = serviceEndpoint.Port;
+            var serviceEndpoint = this._serviceContext.CodePackageActivationContext.GetEndpoint("ServiceEndpoint");
+            var port = serviceEndpoint.Port;
 
-            if (this.serviceContext is StatefulServiceContext)
+            if (this._serviceContext is StatefulServiceContext)
             {
-                StatefulServiceContext statefulInitParams = (StatefulServiceContext) this.serviceContext;
+                StatefulServiceContext statefulInitParams = (StatefulServiceContext) this._serviceContext;
 
-                this.listeningAddress = String.Format(
-                    CultureInfo.InvariantCulture,
-                    "http://+:{0}/{1}/{2}/{3}/",
-                    port,
-                    statefulInitParams.PartitionId,
-                    statefulInitParams.ReplicaId,
-                    Guid.NewGuid());
+                this._listeningAddress =
+                    $"http://+:{port}/{statefulInitParams.PartitionId}/{statefulInitParams.ReplicaId}/{Guid.NewGuid()}/";
             }
-            else if (this.serviceContext is StatelessServiceContext)
+            else if (this._serviceContext is StatelessServiceContext)
             {
-                this.listeningAddress = String.Format(
+                this._listeningAddress = String.Format(
                     CultureInfo.InvariantCulture,
                     "http://+:{0}/{1}",
                     port,
-                    string.IsNullOrWhiteSpace(this.appRoot)
+                    string.IsNullOrWhiteSpace(this._appRoot)
                         ? ""
-                        : this.appRoot.TrimEnd('/') + '/');
+                        : this._appRoot.TrimEnd('/') + '/');
             }
             else
             {
                 throw new InvalidOperationException();
             }
 
-            this.publishAddress = this.listeningAddress.Replace("+", FabricRuntime.GetNodeContext().IPAddressOrFQDN);
+            this._publishAddress = this._listeningAddress.Replace("+", FabricRuntime.GetNodeContext().IPAddressOrFQDN);
 
-            Trace.WriteLine(String.Format("Opening on {0}", this.publishAddress));
+            Trace.WriteLine($"Opening on {this._publishAddress}");
 
             try
             {
-                Trace.WriteLine(String.Format("Starting web server on {0}", this.listeningAddress));
+                Trace.WriteLine($"Starting web server on {this._listeningAddress}");
 
-                this.serverHandle = WebApp.Start(this.listeningAddress, appBuilder => this.startup.Configuration(appBuilder));
+                this._serverHandle = WebApp.Start(this._listeningAddress, appBuilder => this._startup.Configuration(appBuilder));
 
-                return Task.FromResult(this.publishAddress);
+                return Task.FromResult(this._publishAddress);
             }
             catch (Exception ex)
             {
@@ -115,11 +109,11 @@ namespace WordCount.Common
 
         private void StopWebServer()
         {
-            if (this.serverHandle != null)
+            if (this._serverHandle != null)
             {
                 try
                 {
-                    this.serverHandle.Dispose();
+                    this._serverHandle.Dispose();
                 }
                 catch (ObjectDisposedException)
                 {

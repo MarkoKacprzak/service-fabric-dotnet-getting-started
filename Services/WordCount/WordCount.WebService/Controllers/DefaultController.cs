@@ -2,22 +2,20 @@
 //  Copyright (c) Microsoft Corporation.  All rights reserved.
 //  Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
 // ------------------------------------------------------------
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Fabric;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web.Http;
+using Microsoft.ServiceFabric.Services.Client;
+using Microsoft.ServiceFabric.Services.Communication.Client;
 
 namespace WordCount.WebService.Controllers
 {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Fabric;
-    using System.Fabric.Query;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Web.Http;
-    using Microsoft.ServiceFabric.Services.Client;
-    using Microsoft.ServiceFabric.Services.Communication.Client;
-
     /// <summary>
     /// Default controller.
     /// </summary>
@@ -26,22 +24,22 @@ namespace WordCount.WebService.Controllers
     {
         private const int MaxQueryRetryCount = 20;
 
-        private static readonly Uri serviceUri;
-        private static readonly TimeSpan backoffQueryDelay;
+        private static readonly Uri ServiceUri;
+        private static readonly TimeSpan BackoffQueryDelay;
 
-        private static readonly FabricClient fabricClient;
+        private static readonly FabricClient FabricClient;
 
-        private static readonly HttpCommunicationClientFactory communicationFactory;
+        private static readonly HttpCommunicationClientFactory CommunicationFactory;
 
         static DefaultController()
         {
-            serviceUri = new Uri(FabricRuntime.GetActivationContext().ApplicationName + "/WordCountService");
+            ServiceUri = new Uri(FabricRuntime.GetActivationContext().ApplicationName + "/WordCountService");
 
-            backoffQueryDelay = TimeSpan.FromSeconds(3);
+            BackoffQueryDelay = TimeSpan.FromSeconds(3);
 
-            fabricClient = new FabricClient();
+            FabricClient = new FabricClient();
 
-            communicationFactory = new HttpCommunicationClientFactory(new ServicePartitionResolver(() => fabricClient));
+            CommunicationFactory = new HttpCommunicationClientFactory(new ServicePartitionResolver(() => FabricClient));
         }
 
         [HttpGet]
@@ -49,22 +47,22 @@ namespace WordCount.WebService.Controllers
         public async Task<HttpResponseMessage> Count()
         {
             // For each partition client, keep track of partition information and the number of words
-            ConcurrentDictionary<Int64RangePartitionInformation, long> totals = new ConcurrentDictionary<Int64RangePartitionInformation, long>();
+            var totals = new ConcurrentDictionary<Int64RangePartitionInformation, long>();
             IList<Task> tasks = new List<Task>();
 
-            foreach (Int64RangePartitionInformation partition in await this.GetServicePartitionKeysAsync())
+            foreach (var partition in await this.GetServicePartitionKeysAsync())
             {
                 try
                 {
-                    ServicePartitionClient<HttpCommunicationClient> partitionClient
-                        = new ServicePartitionClient<HttpCommunicationClient>(communicationFactory, serviceUri, new ServicePartitionKey(partition.LowKey));
+                    var partitionClient
+                        = new ServicePartitionClient<HttpCommunicationClient>(CommunicationFactory, ServiceUri, new ServicePartitionKey(partition.LowKey));
 
                     await partitionClient.InvokeWithRetryAsync(
                         async (client) =>
                         {
-                            HttpResponseMessage response = await client.HttpClient.GetAsync(new Uri(client.Url, "Count"));
-                            string content = await response.Content.ReadAsStringAsync();
-                            totals[partition] = Int64.Parse(content.Trim());
+                            var response = await client.HttpClient.GetAsync(new Uri(client.Url, "Count"));
+                            var content = await response.Content.ReadAsStringAsync();
+                            totals[partition] = long.Parse(content.Trim());
                         });
                 }
                 catch (Exception ex)
@@ -74,12 +72,12 @@ namespace WordCount.WebService.Controllers
                 }
             }
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append("<h1> Total:");
             sb.Append(totals.Aggregate<KeyValuePair<Int64RangePartitionInformation, long>, long>(0, (total, next) => next.Value + total));
             sb.Append("</h1>");
             sb.Append("<table><tr><td>Partition ID</td><td>Key Range</td><td>Total</td></tr>");
-            foreach (KeyValuePair<Int64RangePartitionInformation, long> partitionData in totals.OrderBy(partitionData => partitionData.Key.LowKey))
+            foreach (var partitionData in totals.OrderBy(partitionData => partitionData.Key.LowKey))
             {
                 sb.Append("<tr><td>");
                 sb.Append(partitionData.Key.Id);
@@ -103,10 +101,10 @@ namespace WordCount.WebService.Controllers
         public async Task<HttpResponseMessage> AddWord(string word)
         {
             // Determine the partition key that should handle the request
-            long partitionKey = GetPartitionKey(word);
+            var partitionKey = GetPartitionKey(word);
 
-            ServicePartitionClient<HttpCommunicationClient> partitionClient
-                = new ServicePartitionClient<HttpCommunicationClient>(communicationFactory, serviceUri, new ServicePartitionKey(partitionKey));
+            var partitionClient
+                = new ServicePartitionClient<HttpCommunicationClient>(CommunicationFactory, ServiceUri, new ServicePartitionKey(partitionKey));
 
             await
                 partitionClient.InvokeWithRetryAsync(
@@ -115,7 +113,7 @@ namespace WordCount.WebService.Controllers
             return new HttpResponseMessage()
             {
                 Content = new StringContent(
-                    String.Format("<h1>{0}</h1> added to partition with key <h2>{1}</h2>", word, partitionKey),
+                    $"<h1>{word}</h1> added to partition with key <h2>{partitionKey}</h2>",
                     Encoding.UTF8,
                     "text/html")
             };
@@ -144,20 +142,17 @@ namespace WordCount.WebService.Controllers
                 try
                 {
                     // Get the list of partitions up and running in the service.
-                    ServicePartitionList partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+                    var partitionList = await FabricClient.QueryManager.GetPartitionListAsync(ServiceUri);
 
                     // For each partition, build a service partition client used to resolve the low key served by the partition.
                     IList<Int64RangePartitionInformation> partitionKeys = new List<Int64RangePartitionInformation>(partitionList.Count);
-                    foreach (Partition partition in partitionList)
+                    foreach (var partition in partitionList)
                     {
-                        Int64RangePartitionInformation partitionInfo = partition.PartitionInformation as Int64RangePartitionInformation;
+                        var partitionInfo = partition.PartitionInformation as Int64RangePartitionInformation;
                         if (partitionInfo == null)
                         {
                             throw new InvalidOperationException(
-                                string.Format(
-                                    "The service {0} should have a uniform Int64 partition. Instead: {1}",
-                                    serviceUri.ToString(),
-                                    partition.PartitionInformation.Kind));
+                                $"The service {ServiceUri.ToString()} should have a uniform Int64 partition. Instead: {partition.PartitionInformation.Kind}");
                         }
 
                         partitionKeys.Add(partitionInfo);
@@ -174,7 +169,7 @@ namespace WordCount.WebService.Controllers
                     }
                 }
 
-                await Task.Delay(backoffQueryDelay);
+                await Task.Delay(BackoffQueryDelay);
             }
 
             throw new TimeoutException("Retry timeout is exhausted and creating representative partition clients wasn't successful");

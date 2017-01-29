@@ -11,7 +11,7 @@ namespace WordCount.WebService
     [EventSource(Name = "MyCompany-WordCount-WordCount.WebService")]
     internal sealed class ServiceEventSource : EventSource
     {
-        public static ServiceEventSource Current = new ServiceEventSource();
+        public static readonly ServiceEventSource Current = new ServiceEventSource();
 
         [Event(1, Level = EventLevel.Verbose)]
         public void MessageEvent(string message)

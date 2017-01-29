@@ -2,14 +2,13 @@
 //  Copyright (c) Microsoft Corporation.  All rights reserved.
 //  Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
 // ------------------------------------------------------------
+using System;
+using System.Net;
+using System.Net.Sockets;
+using Microsoft.ServiceFabric.Services.Communication.Client;
 
 namespace WordCount.WebService
 {
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
-    using Microsoft.ServiceFabric.Services.Communication.Client;
-
     public class HttpExceptionHandler : IExceptionHandler
     {
         public bool TryHandleException(ExceptionInformation exceptionInformation, OperationRetrySettings retrySettings, out ExceptionHandlingResult result)
@@ -30,16 +29,12 @@ namespace WordCount.WebService
                 return true;
             }
 
-            WebException we = exceptionInformation.Exception as WebException;
-
-            if (we == null)
-            {
-                we = exceptionInformation.Exception.InnerException as WebException;
-            }
+            var we = exceptionInformation.Exception as WebException ??
+                     exceptionInformation.Exception.InnerException as WebException;
 
             if (we != null)
             {
-                HttpWebResponse errorResponse = we.Response as HttpWebResponse;
+                var errorResponse = we.Response as HttpWebResponse;
 
                 if (we.Status == WebExceptionStatus.ProtocolError)
                 {

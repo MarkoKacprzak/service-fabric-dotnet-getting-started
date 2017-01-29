@@ -2,24 +2,23 @@
 //  Copyright (c) Microsoft Corporation.  All rights reserved.
 //  Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
 // ------------------------------------------------------------
+using System.Web.Http;
+using Microsoft.ServiceFabric.Data;
+using Owin;
+using WordCount.Common;
 
 namespace WordCount.Service
 {
-    using System.Web.Http;
-    using Microsoft.ServiceFabric.Data;
-    using Owin;
-    using WordCount.Common;
-
     /// <summary>
     /// OWIN configuration
     /// </summary>
     public class Startup : IOwinAppBuilder
     {
-        private readonly IReliableStateManager stateManager;
+        private readonly IReliableStateManager _stateManager;
 
         public Startup(IReliableStateManager stateManager)
         {
-            this.stateManager = stateManager;
+            _stateManager = stateManager;
         }
 
         /// <summary>
@@ -30,10 +29,10 @@ namespace WordCount.Service
         {
             System.Net.ServicePointManager.DefaultConnectionLimit = 256;
 
-            HttpConfiguration config = new HttpConfiguration();
+            var config = new HttpConfiguration();
 
             FormatterConfig.ConfigureFormatters(config.Formatters);
-            UnityConfig.RegisterComponents(config, this.stateManager);
+            UnityConfig.RegisterComponents(config, _stateManager);
 
             config.MapHttpAttributeRoutes();
 

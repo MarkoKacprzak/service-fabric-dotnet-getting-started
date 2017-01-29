@@ -7,7 +7,7 @@
     <ProjectGuid>{BC38F530-FE66-461B-9CCF-37380BFCCBB8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.Azure.Service.Fabric.Samples.WordCount.Common</RootNamespace>
+    <RootNamespace>WordCount.Common</RootNamespace>
     <AssemblyName>WordCount.Common</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -2,20 +2,19 @@
 //  Copyright (c) Microsoft Corporation.  All rights reserved.
 //  Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
 // ------------------------------------------------------------
+using System;
+using System.Collections.Generic;
+using System.Fabric;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Data.Collections;
+using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using Microsoft.ServiceFabric.Services.Runtime;
+using WordCount.Common;
 
 namespace WordCount.Service
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Fabric;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Microsoft.ServiceFabric.Data;
-    using Microsoft.ServiceFabric.Data.Collections;
-    using Microsoft.ServiceFabric.Services.Communication.Runtime;
-    using Microsoft.ServiceFabric.Services.Runtime;
-    using WordCount.Common;
-
     /// <summary>
     /// Sample Service Fabric persistent service for counting words.
     /// </summary>
@@ -36,10 +35,10 @@ namespace WordCount.Service
         {
             ServiceEventSource.Current.RunAsyncInvoked(ServiceEventSourceName);
 
-            IReliableQueue<string> inputQueue = await this.StateManager.GetOrAddAsync<IReliableQueue<string>>("inputQueue");
-            IReliableDictionary<string, long> wordCountDictionary =
+            var inputQueue = await this.StateManager.GetOrAddAsync<IReliableQueue<string>>("inputQueue");
+            var wordCountDictionary =
                 await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("wordCountDictionary");
-            IReliableDictionary<string, long> statsDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("statsDictionary");
+            var statsDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("statsDictionary");
 
             while (true)
             {
@@ -47,27 +46,27 @@ namespace WordCount.Service
 
                 try
                 {
-                    using (ITransaction tx = this.StateManager.CreateTransaction())
+                    using (var tx = this.StateManager.CreateTransaction())
                     {
-                        ConditionalValue<string> dequeuReply = await inputQueue.TryDequeueAsync(tx);
+                        var dequeuReply = await inputQueue.TryDequeueAsync(tx);
 
                         if (dequeuReply.HasValue)
                         {
-                            string word = dequeuReply.Value;
+                            var word = dequeuReply.Value;
 
-                            long count = await wordCountDictionary.AddOrUpdateAsync(
+                            var count = await wordCountDictionary.AddOrUpdateAsync(
                                 tx,
                                 word,
                                 1,
                                 (key, oldValue) => oldValue + 1);
 
-                            long numberOfProcessedWords = await statsDictionary.AddOrUpdateAsync(
+                            var numberOfProcessedWords = await statsDictionary.AddOrUpdateAsync(
                                 tx,
                                 "Number of Words Processed",
                                 1,
                                 (key, oldValue) => oldValue + 1);
 
-                            long queueLength = await inputQueue.GetCountAsync(tx);
+                            var queueLength = await inputQueue.GetCountAsync(tx);
 
                             await tx.CommitAsync();
 
